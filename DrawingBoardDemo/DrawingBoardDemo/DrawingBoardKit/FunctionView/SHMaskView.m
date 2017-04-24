@@ -18,35 +18,31 @@
 
 - (void)drawRect:(CGRect)rect {
     CGContextRef context =CGContextRetain(UIGraphicsGetCurrentContext());
-    CGContextSaveGState(context);
-    {
-        for (NSUInteger i = 0; i<_pathModelArray.count; i++) {
-            SHPathModel * pathModel = [_pathModelArray objectAtIndex:i];
-            CGContextSetLineWidth(context, pathModel.path.lineWidth);
-            
-            CGColorRef clearColorRef = CGColorRetain([UIColor clearColor].CGColor);
-            CGContextSetStrokeColorWithColor(context,clearColorRef);
+    for (NSUInteger i = 0; i<_pathModelArray.count; i++) {
+        SHPathModel * pathModel = [_pathModelArray objectAtIndex:i];
+        CGContextSetLineWidth(context, pathModel.path.lineWidth);
+        
+        CGColorRef clearColorRef = CGColorRetain([UIColor clearColor].CGColor);
+        CGContextSetStrokeColorWithColor(context,clearColorRef);
+        CGColorRelease(clearColorRef);
+        
+        CGContextSetLineCap(context, pathModel.path.lineCapStyle);
+        
+        CGPathRef pathRef = CGPathRetain(pathModel.path.CGPath);
+        CGContextAddPath(context, pathRef);
+        CGPathRelease(pathRef);
+        
+        CGContextSetBlendMode(context, kCGBlendModeClear);
+        if (pathModel.isClosePath) {
+            CGContextSetFillColorWithColor(context,CGColorRetain(clearColorRef));
             CGColorRelease(clearColorRef);
             
-            CGContextSetLineCap(context, pathModel.path.lineCapStyle);
-            
-            CGPathRef pathRef = CGPathRetain(pathModel.path.CGPath);
-            CGContextAddPath(context, pathRef);
-            CGPathRelease(pathRef);
-            
-            CGContextSetBlendMode(context, kCGBlendModeClear);
-            if (pathModel.isClosePath) {
-                CGContextSetFillColorWithColor(context,CGColorRetain(clearColorRef));
-                CGColorRelease(clearColorRef);
-                
-                CGContextDrawPath(context, kCGPathFillStroke);
-            }
-            else{
-                CGContextStrokePath(context);
-            }
+            CGContextDrawPath(context, kCGPathFillStroke);
+        }
+        else{
+            CGContextStrokePath(context);
         }
     }
-    CGContextRestoreGState(context);
     CGContextRelease(context);
 }
 

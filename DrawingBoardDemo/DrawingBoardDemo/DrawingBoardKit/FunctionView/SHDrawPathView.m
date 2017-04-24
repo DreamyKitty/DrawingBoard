@@ -213,52 +213,47 @@
 // An empty implementation adversely affects performance during animation.
 - (void)drawRect:(CGRect)rect {
     CGContextRef context =CGContextRetain(UIGraphicsGetCurrentContext()) ;
-    CGContextSaveGState(context);
-    {
-//        NSLog(@"_showPathModelArray count:%@",_showPathModelArray);
-        for (NSUInteger i = 0; i<_showPathModelArray.count; i++) {
-            SHPathModel * pathModel = [_showPathModelArray objectAtIndex:i];
-            CGContextSetLineWidth(context, pathModel.path.lineWidth);
+    for (NSUInteger i = 0; i<_showPathModelArray.count; i++) {
+        SHPathModel * pathModel = [_showPathModelArray objectAtIndex:i];
+        CGContextSetLineWidth(context, pathModel.path.lineWidth);
+        
+        CGColorRef cgStrokeColor = CGColorRetain(pathModel.strokeColor.CGColor);
+        CGContextSetStrokeColorWithColor(context,cgStrokeColor);
+        CGColorRelease(cgStrokeColor);
+        
+        CGPathRef cgPath = CGPathRetain(pathModel.path.CGPath);
+        CGContextAddPath(context, cgPath);
+        CGPathRelease(cgPath);
+        
+        CGContextSetLineCap(context, pathModel.path.lineCapStyle);
+        
+        
+        if (pathModel.isClosePath && pathModel.fillColor) {
+            CGColorRef cgfillClosePathColor = CGColorRetain(_fillClosePathColor.CGColor);
+            CGContextSetFillColorWithColor(context,cgfillClosePathColor);
+            CGColorRelease(cgfillClosePathColor);
             
-            CGColorRef cgStrokeColor = CGColorRetain(pathModel.strokeColor.CGColor);
-            CGContextSetStrokeColorWithColor(context,cgStrokeColor);
-            CGColorRelease(cgStrokeColor);
-    
-            CGPathRef cgPath = CGPathRetain(pathModel.path.CGPath);
-            CGContextAddPath(context, cgPath);
-            CGPathRelease(cgPath);
-            
-            CGContextSetLineCap(context, pathModel.path.lineCapStyle);
-
-            
-            if (pathModel.isClosePath && pathModel.fillColor) {
-                CGColorRef cgfillClosePathColor = CGColorRetain(_fillClosePathColor.CGColor);
-                CGContextSetFillColorWithColor(context,cgfillClosePathColor);
-                CGColorRelease(cgfillClosePathColor);
-
-                CGContextDrawPath(context, kCGPathFillStroke);
-            }
-            else{
-                CGContextStrokePath(context);
-            }
+            CGContextDrawPath(context, kCGPathFillStroke);
         }
-        if (_currentPathModel) {
-            CGContextSetLineWidth(context, _currentPathModel.path.lineWidth);
-            
-            CGColorRef currentStrokeColor = CGColorRetain(_currentPathModel.strokeColor.CGColor);
-            CGContextSetStrokeColorWithColor(context,currentStrokeColor);
-            CGColorRelease(currentStrokeColor);
-            
-            CGContextSetLineCap(context, _currentPathModel.path.lineCapStyle);
-            
-            CGPathRef currentCGPath = CGPathRetain(_currentPathModel.path.CGPath);
-            CGContextAddPath(context, currentCGPath);
-            CGPathRelease(currentCGPath);
-            
+        else{
             CGContextStrokePath(context);
         }
     }
-    CGContextRestoreGState(context);
+    if (_currentPathModel) {
+        CGContextSetLineWidth(context, _currentPathModel.path.lineWidth);
+        
+        CGColorRef currentStrokeColor = CGColorRetain(_currentPathModel.strokeColor.CGColor);
+        CGContextSetStrokeColorWithColor(context,currentStrokeColor);
+        CGColorRelease(currentStrokeColor);
+        
+        CGContextSetLineCap(context, _currentPathModel.path.lineCapStyle);
+        
+        CGPathRef currentCGPath = CGPathRetain(_currentPathModel.path.CGPath);
+        CGContextAddPath(context, currentCGPath);
+        CGPathRelease(currentCGPath);
+        
+        CGContextStrokePath(context);
+    }
     CGContextRelease(context);
 }
 
